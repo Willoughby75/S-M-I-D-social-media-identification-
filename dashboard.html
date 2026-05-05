@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>S M I D — Identity Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    :root{--black:#050507;--white:#f5f4ef;--accent:#00e5a0;--accent2:#ff4d6d;--mid:#1a1a22;--muted:#5a5a70;--border:rgba(255,255,255,0.07);}
+    body{background:var(--black);color:var(--white);font-family:"DM Sans",sans-serif;font-weight:300;min-height:100vh;cursor:none;opacity:0;transition:opacity 0.5s;}
+    .cursor{position:fixed;width:10px;height:10px;background:var(--accent);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);mix-blend-mode:difference;}
+    .cursor-ring{position:fixed;width:36px;height:36px;border:1px solid rgba(0,229,160,0.5);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);}
+    nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1.2rem 2.5rem;border-bottom:1px solid var(--border);background:rgba(5,5,7,0.85);backdrop-filter:blur(14px);}
+    .nav-logo{font-family:"Bebas Neue",sans-serif;font-size:1.6rem;letter-spacing:0.35em;color:var(--accent);text-decoration:none;}
+    .nav-verified{font-family:"Space Mono",monospace;font-size:0.62rem;letter-spacing:0.18em;color:var(--accent);background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.2);padding:0.35rem 0.9rem;}
+
+    .page{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8rem 2rem 4rem;}
+    .content{width:100%;max-width:640px;}
+
+    .step-label{font-family:"Space Mono",monospace;font-size:0.65rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--accent);margin-bottom:1rem;text-align:center;}
+    .page-title{font-family:"Bebas Neue",sans-serif;font-size:clamp(2.5rem,8vw,5rem);letter-spacing:0.1em;line-height:0.9;margin-bottom:0.5rem;text-align:center;}
+    .page-sub{font-size:0.9rem;line-height:1.7;color:var(--muted);margin-bottom:2.5rem;text-align:center;}
+
+    /* PROGRESS */
+    .progress{display:flex;gap:4px;margin-bottom:2.5rem;}
+    .progress-step{flex:1;height:3px;background:rgba(255,255,255,0.06);}
+    .progress-step.done{background:var(--accent);}
+
+    /* IDENTITY CARD */
+    .id-card{background:linear-gradient(135deg,#0d1a14 0%,#0a0a0f 60%,#111117 100%);border:1px solid rgba(0,229,160,0.3);padding:2.5rem;position:relative;overflow:hidden;margin-bottom:2rem;box-shadow:0 0 60px rgba(0,229,160,0.06);}
+    .id-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),rgba(0,229,160,0.2));}
+    .id-card-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(0,229,160,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,160,0.03) 1px,transparent 1px);background-size:30px 30px;pointer-events:none;}
+    .id-card-watermark{position:absolute;bottom:-1rem;right:-1rem;font-family:"Bebas Neue",sans-serif;font-size:8rem;letter-spacing:0.1em;color:rgba(0,229,160,0.03);pointer-events:none;user-select:none;line-height:1;}
+
+    .id-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2rem;position:relative;z-index:1;}
+    .id-brand{font-family:"Bebas Neue",sans-serif;font-size:1.4rem;letter-spacing:0.3em;color:var(--accent);}
+    .id-type-badge{font-family:"Space Mono",monospace;font-size:0.6rem;letter-spacing:0.15em;padding:0.35rem 0.8rem;border:1px solid var(--accent);color:var(--accent);text-transform:uppercase;}
+
+    .id-avatar{width:72px;height:72px;border-radius:50%;background:rgba(0,229,160,0.08);border:2px solid rgba(0,229,160,0.3);display:flex;align-items:center;justify-content:center;margin-bottom:1.2rem;position:relative;z-index:1;}
+    .id-initials{font-family:"Bebas Neue",sans-serif;font-size:1.8rem;letter-spacing:0.1em;color:var(--accent);}
+
+    .id-name{font-family:"Bebas Neue",sans-serif;font-size:clamp(1.8rem,5vw,3rem);letter-spacing:0.08em;line-height:1;margin-bottom:0.4rem;position:relative;z-index:1;}
+    .id-category{font-family:"Space Mono",monospace;font-size:0.68rem;letter-spacing:0.2em;color:var(--accent);text-transform:uppercase;margin-bottom:1.8rem;position:relative;z-index:1;}
+
+    .id-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;position:relative;z-index:1;margin-bottom:1.5rem;}
+    .id-field{border-top:1px solid var(--border);padding-top:0.8rem;}
+    .id-field-label{font-family:"Space Mono",monospace;font-size:0.55rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:0.3rem;}
+    .id-field-value{font-family:"Space Mono",monospace;font-size:0.8rem;letter-spacing:0.08em;color:var(--white);}
+
+    .id-footer{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border);padding-top:1rem;position:relative;z-index:1;}
+    .id-status{display:flex;align-items:center;gap:0.5rem;}
+    .id-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 6px var(--accent);animation:blink 2s infinite;}
+    .id-status-text{font-family:"Space Mono",monospace;font-size:0.58rem;letter-spacing:0.15em;color:var(--accent);}
+    .id-code{font-family:"Space Mono",monospace;font-size:0.6rem;letter-spacing:0.12em;color:var(--muted);}
+
+    /* STATS */
+    .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-bottom:2rem;}
+    .stat-box{background:var(--mid);border:1px solid var(--border);padding:1.5rem 1rem;text-align:center;transition:border-color 0.3s;}
+    .stat-box:hover{border-color:var(--accent);}
+    .stat-num{font-family:"Bebas Neue",sans-serif;font-size:2.5rem;letter-spacing:0.05em;color:var(--accent);line-height:1;}
+    .stat-lbl{font-family:"Space Mono",monospace;font-size:0.55rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-top:0.3rem;}
+
+    /* ACTIONS */
+    .actions{display:flex;gap:1rem;flex-wrap:wrap;}
+    .btn{font-family:"Space Mono",monospace;font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;padding:0.9rem 1.8rem;border:none;cursor:pointer;transition:all 0.2s;text-decoration:none;display:inline-block;flex:1;text-align:center;}
+    .btn-green{background:var(--accent);color:var(--black);font-weight:700;}
+    .btn-green:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,229,160,0.3);}
+    .btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+    .btn-outline:hover{border-color:var(--accent);color:var(--white);}
+
+    @keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+    .fade-in{opacity:0;animation:fadeUp 0.7s 0.3s forwards;}
+    @media(max-width:600px){nav{padding:1rem 1.2rem;}.page{padding:7rem 1rem 3rem;}.id-grid{grid-template-columns:1fr;}.stats-grid{grid-template-columns:1fr 1fr;}.actions{flex-direction:column;}.id-card{padding:1.5rem;}}
+  </style>
+</head>
+<body>
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="ring"></div>
+
+  <nav>
+    <a href="index.html" class="nav-logo">S M I D</a>
+    <span class="nav-verified">✦ VERIFIED</span>
+  </nav>
+
+  <div class="page">
+    <div class="content fade-in">
+      <p class="step-label">Step 3 of 3 · Identity Dashboard</p>
+      <h1 class="page-title">YOUR S M I D<br>IDENTITY</h1>
+      <p class="page-sub">Your identity has been created and verified. Welcome to the S M I D network.</p>
+
+      <div class="progress">
+        <div class="progress-step done"></div>
+        <div class="progress-step done"></div>
+        <div class="progress-step done"></div>
+      </div>
+
+      <!-- IDENTITY CARD -->
+      <div class="id-card">
+        <div class="id-card-bg"></div>
+        <div class="id-card-watermark">SMID</div>
+
+        <div class="id-header">
+          <div class="id-brand">S M I D</div>
+          <div class="id-type-badge" id="cardBadge">IDENTITY</div>
+        </div>
+
+        <div class="id-avatar">
+          <div class="id-initials" id="cardInitials">OW</div>
+        </div>
+
+        <div class="id-name" id="cardName">FULL NAME</div>
+        <div class="id-category" id="cardCategory">Category</div>
+
+        <div class="id-grid">
+          <div class="id-field">
+            <div class="id-field-label">Age</div>
+            <div class="id-field-value" id="cardAge">—</div>
+          </div>
+          <div class="id-field">
+            <div class="id-field-label">Category Code</div>
+            <div class="id-field-value" id="cardCat">—</div>
+          </div>
+          <div class="id-field">
+            <div class="id-field-label">Status</div>
+            <div class="id-field-value" style="color:var(--accent);">VERIFIED ✦</div>
+          </div>
+          <div class="id-field">
+            <div class="id-field-label">Issued</div>
+            <div class="id-field-value" id="cardDate">—</div>
+          </div>
+        </div>
+
+        <div class="id-footer">
+          <div class="id-status">
+            <div class="id-dot"></div>
+            <span class="id-status-text">Identity Active</span>
+          </div>
+          <div class="id-code" id="cardId">SMID-XXXXXX</div>
+        </div>
+      </div>
+
+      <!-- STATS -->
+      <div class="stats-grid">
+        <div class="stat-box"><div class="stat-num">✦</div><div class="stat-lbl">Verified</div></div>
+        <div class="stat-box"><div class="stat-num" id="statCat">—</div><div class="stat-lbl">Category</div></div>
+        <div class="stat-box"><div class="stat-num">01</div><div class="stat-lbl">Phase Active</div></div>
+      </div>
+
+      <div class="actions">
+        <a href="prototype.html" class="btn btn-outline">← Re-scan Identity</a>
+        <a href="index.html" class="btn btn-green">Back to S M I D Home</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.addEventListener("load",()=>{document.body.style.opacity="1";});
+    const cur=document.getElementById("cursor"),ring=document.getElementById("ring");
+    let mx=0,my=0,rx=0,ry=0;
+    document.addEventListener("mousemove",e=>{mx=e.clientX;my=e.clientY;if(cur){cur.style.left=mx+"px";cur.style.top=my+"px";}});
+    function animR(){rx+=(mx-rx)*0.12;ry+=(my-ry)*0.12;if(ring){ring.style.left=rx+"px";ring.style.top=ry+"px";}requestAnimationFrame(animR);}
+    animR();
+
+    // Load identity from sessionStorage
+    const name  = sessionStorage.getItem("smid_name")  || "Anonymous User";
+    const age   = sessionStorage.getItem("smid_age")   || "—";
+    const cat   = sessionStorage.getItem("smid_cat")   || "SMID";
+    const full  = sessionStorage.getItem("smid_full")  || "Social Media Identification";
+    const id    = sessionStorage.getItem("smid_id")    || "SMID-DEMO";
+
+    const initials = name.split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2);
+    const today = new Date().toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"});
+
+    document.getElementById("cardName").textContent    = name.toUpperCase();
+    document.getElementById("cardCategory").textContent = full;
+    document.getElementById("cardInitials").textContent = initials;
+    document.getElementById("cardAge").textContent     = age;
+    document.getElementById("cardCat").textContent     = cat;
+    document.getElementById("cardDate").textContent    = today;
+    document.getElementById("cardId").textContent      = id;
+    document.getElementById("cardBadge").textContent   = cat;
+    document.getElementById("statCat").textContent     = cat;
+
+    console.log("S M I D Dashboard loaded for:", name, "| Category:", cat, "| ID:", id);
+  </script>
+</body>
+</html>
